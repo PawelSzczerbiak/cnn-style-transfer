@@ -1,13 +1,16 @@
 import torch
 import torch.optim as optim
+from torch import nn
 from torchvision import transforms, models
+
+import numpy as np
 
 import requests
 from PIL import Image
 from io import BytesIO
 
 
-def vgg19(pretrained=True, requires_grad=False, only_features=True):
+def load_vgg19(pretrained=True, requires_grad=False, only_features=True):
 	'''Returns vgg19 model with some options to be customized'''
 
 	model = models.vgg19(pretrained=pretrained)
@@ -18,8 +21,8 @@ def vgg19(pretrained=True, requires_grad=False, only_features=True):
 
 	if only_features:
 		return model.features
-	else:
-		return model
+
+	return model
 
 
 def load_image(path, max_size=256, shape=None):
@@ -38,11 +41,11 @@ def load_image(path, max_size=256, shape=None):
 		size = shape
 	else:
 		# resize height and width to be smaller than max_size
-		h, w = image.shape[-2:]
+		w, h = image.size
 		if h >= max(w, max_size):
-			h, w = (max_size, w * max_size / h)
+			h, w = (max_size, int(w * max_size / h))
 		elif w >  max(h, max_size):
-			h, w = (h * max_size / w, max_size)
+			h, w = (int(h * max_size / w), max_size)
 		size = (h, w)
 
 	transform = transforms.Compose([
@@ -67,3 +70,38 @@ def convert_image(tensor):
 	image = image.clip(0, 1) # just in case that some values lies ooutside the [0, 1] range
 
 	return image
+
+
+# Well, this function is a little overkill, but instructive :)
+def get_layer_names(model):
+    '''Returns dict with layer names as in the paper Gatys et al (2016)
+       One can easily generalize it to get any layers names of any type from any model.
+    '''
+    
+    layers = {}
+    j = 1
+    k = 1
+    for i, el in model._modules.items():
+        if isinstance(el, nn.MaxPool2d):
+            j += 1
+            k = 1
+        elif isinstance(el, nn.ReLU):
+            k += 1
+        elif isinstance(el, nn.Conv2d):
+            layers[i] = 'conv' + str(j) + '_' + str(k)
+    
+    return layers
+
+
+def get_features(image, model, layer_names):
+    '''Returns features from specifiled layers in a given model for selected image'''
+    
+    features = {}
+    x = image
+    
+    for i, layer in model._modules.items():
+        x = layer(x)
+        if i in layer_names:
+            features[layer_names[i]] = x
+            
+    return features
