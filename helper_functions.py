@@ -28,8 +28,7 @@ def load_vgg19(pretrained=True, requires_grad=False, only_features=True):
 def load_image(path, max_size=256, shape=None):
     '''Load in and transform an image 
        with max_size not larger than specified
-       or a given shape (if specified)
-    '''
+       or a given shape (if specified)'''
 
     if 'http' in path:
         respone = requests.get(path)
@@ -72,11 +71,18 @@ def convert_image(tensor):
     return image
 
 
+def save_tensor_as_image(array, name):
+    '''Saves PyTorch tensor as image.
+       The tensor should represent an image i.e. shape = 1 x 3 x height x width'''
+
+    img = Image.fromarray(np.uint8(convert_image(array)*255))
+    img.save(name)
+
+
 # Well, this function is a little overkill, but instructive :)
 def get_layer_names(model):
     '''Returns dict with layer names as in the paper Gatys et al (2016)
-       One can easily generalize it to get any layers names of any type from any model.
-    '''
+       One can easily generalize it to get any layers names of any type from any model'''
     
     layers = {}
     j = 1
