@@ -1,0 +1,15 @@
+content_layer_name: conv4_2
+style_weights: {'conv1_1': 1.0, 'conv2_1': 0.75, 'conv3_1': 0.5, 'conv4_1': 0.2, 'conv5_1': 0.2}
+style_to_content_weight: 100000.0
+lr: 0.01
+optimizer: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.01
+    weight_decay: 0
+)
+steps: 3000
+Start time: 2019-05-18_21-03-19.098330
+End time: 2019-05-19_08-30-50.704186
